@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"github.com/nyudlts/go-aspace"
 	"io/ioutil"
@@ -19,19 +20,36 @@ type ResourceInfo struct {
 	EADID       string
 }
 
-var resourceInfo = []ResourceInfo{}
-var client *aspace.ASClient
-var err error
-var workers = 4
-var resourceMap map[string]ResourceInfo
+var (
+	resourceInfo = []ResourceInfo{}
+	client       *aspace.ASClient
+	err          error
+	workers      = 4
+	resourceMap  map[string]ResourceInfo
+	generate     bool
+	export       bool
+)
+
+func init() {
+	flag.IntVar(&workers, "workers", 4, "number of workers")
+	flag.BoolVar(&generate, "generate", false, "generate")
+	flag.BoolVar(&export, "export", false, "export")
+}
 
 func main() {
+	flag.Parse()
 	client, err = aspace.NewClient("/etc/sysconfig/go-aspace.yml", "prod", 20)
 	if err != nil {
 		panic(err)
 	}
-	//getResourceInfo()
-	exportMarc()
+
+	if generate == true {
+		getResourceInfo()
+	}
+
+	if export == true {
+		exportMarc()
+	}
 }
 
 func exportMarc() {
